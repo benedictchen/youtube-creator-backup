@@ -14,9 +14,7 @@ If this was helpful to you, please buy me (@benedictchen) a beer on PayPal: [Cli
 
 ## Why 
 
-Because Google sucks.  Google Takeout is impossible thanks to "Failed - Network Error" that magically happens every single time you try to download.  
-They have also eliminated the ability to sync to other cloud providers.  There is no way to bulk download this stuff yourself.  Not because Googlers
-aren't able to write the code for it, but because they're jerks.  
+Because Google sucks.  Google Takeout is impossible thanks to "Failed - Network Error" that magically happens every single time you try to download.  They have also eliminated the ability to sync to other cloud providers. There is no way to bulk download this stuff yourself.  Not because Googlers aren't able to write the code for it, but because they're jerks.  I created this as a means to save my own YouTube videos (which I've been using as a personal storage bucket since YT's creation).  I have thousands of videos and it's not feasible to download one at a time.  
 
 ## Instructions
 
