@@ -71,9 +71,10 @@ let interceptor = function (method, url, async) {
 	}
     return oldXHROpen.apply(this, arguments);
 }
-interceptor.isIntercepted = true;
+
 if (window.XMLHttpRequest.prototype.open !== interceptor && !window.XMLHttpRequest.prototype.open.isIntercepted) {
 	window.XMLHttpRequest.prototype.open = interceptor;
+	interceptor.isIntercepted = true;
 } else {
 	console.warn('Already have interceptor');
 }
