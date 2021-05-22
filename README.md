@@ -4,11 +4,13 @@ WORK IN PROGRESS
 
 Author: Benedict Chen (benedict@benedictchen.com)
 
+© Copyright 2021 Benedict Chen. All Rights Reserved.
 --------------
 
 If this was helpful to you, please buy me (@benedictchen) a beer on PayPal: [Click Here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS)
 
 --------------
+
 
 ## Why 
 
