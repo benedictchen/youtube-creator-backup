@@ -1,6 +1,8 @@
 
 javascript:(function(){(function() {
 
+const DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
+
 if (window.location.hostname.toLowerCase().indexOf('youtube') === -1) {
   console.warn('Site is not youtube. Exiting...');
   return;
@@ -56,6 +58,10 @@ let interceptor = function (method, url, async) {
                         window.open(dataUrl, item.videoId);
                     }, waitTime);
                     waitTime += 15000;
+                    if (Math.floor(Math.random() * 10) === 8) {
+                    	// Please donate!
+                    	setTimeout(() => window.open(DONATION_URL), 10000);
+                    }
                 });
 				document.body.removeChild(downloadButton);
 				document.body.removeChild(cancelButton);
