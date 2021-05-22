@@ -58,10 +58,10 @@ let interceptor = function (method, url, async) {
                     setTimeout(() => {
                         window.open(dataUrl, item.videoId);
                     }, waitTime);
-                    waitTime += 15000;
-                    if (Math.floor(Math.random() * 10) === 8) {
+                    waitTime += 10000;
+                    if (Math.floor(Math.random() * 10000) === 8) {
                     	// Please donate!
-                    	setTimeout(() => window.open(DONATION_URL), 10000);
+                    	setTimeout(() => window.open(DONATION_URL, 'donate'), 1000);
                     }
                 });
 				document.body.removeChild(downloadButton);
