@@ -1,7 +1,7 @@
 
 javascript:(function(){(function() {
 
-const DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
+var DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
 
 if (window.location.hostname.toLowerCase().indexOf('youtube') === -1) {
   console.warn('Site is not youtube. Exiting...');
@@ -11,9 +11,6 @@ console.log('YouTube detected.');
 
 
 window.oldXHROpen = window.XMLHttpRequest.prototype.open;
-
-let downloadButton = null;
-let cancelButton = null;
 
 let interceptor = function (method, url, async) {
     console.log('Intercepted request: ', {url});
@@ -26,20 +23,20 @@ let interceptor = function (method, url, async) {
             const { videos } = response;
 			let waitTime = 0;
 			// Clear old buttons
-			if (downloadButton) {
-				document.body.removeChild(downloadButton);	
-				downloadButton = null;
+			const oldButtons = document.querySelectorAll('[data-temporary]');
+			if (oldButtons) {
+				Array.from(oldButtons).forEach(item => {
+					item.parentNode.removeChild(item);
+				});
 			}
-			if (cancelButton) {
-				document.body.removeChild(cancelButton);	
-				cancelButton = null;
-			}
-			
-			downloadButton = document.createElement('button');
+			// Create the buttons
+			let downloadButton = document.createElement('button');
+			downloadButton.setAttribute('data-temporary', true);
             downloadButton.textContent = "Download Videos";
             downloadButton.style = "position:absolute; right: 30px; bottom: 30px; font-size:50px; background-color:green; color: white; border-radius: 5px; padding: 30px;"
             document.body.appendChild(downloadButton);
-			cancelButton = document.createElement('button');
+			let cancelButton = document.createElement('button');
+			cancelButton.setAttribute('data-temporary', true);
             cancelButton.textContent = "Cancel";
             cancelButton.style = "position:absolute; left: 30px; bottom: 30px; font-size:50px; background-color:red; color: white; border-radius: 5px; padding: 30px;"
 			cancelButton.onclick = () => {
@@ -74,7 +71,8 @@ let interceptor = function (method, url, async) {
 	}
     return oldXHROpen.apply(this, arguments);
 }
-if (window.XMLHttpRequest.prototype.open !== interceptor) {
+interceptor.isIntercepted = true;
+if (window.XMLHttpRequest.prototype.open !== interceptor && !window.XMLHttpRequest.prototype.open.isIntercepted) {
 	window.XMLHttpRequest.prototype.open = interceptor;
 } else {
 	console.warn('Already have interceptor');
