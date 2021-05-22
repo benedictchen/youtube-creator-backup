@@ -1,5 +1,9 @@
+/**
+ * © Copyright 2021 Benedict Chen. All Rights Reserved.
+ * @author Benedict Chen (benedict@benedictchen.com) 
+ */
 
-javascript:(function(){(function() {
+(function(){(function() {
 
 var DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
 
