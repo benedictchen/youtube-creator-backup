@@ -64,6 +64,8 @@ If this was helpful to you, please buy me (@benedictchen) a beer on PayPal: [Cli
 --------------
 
 
+Credit
+- An actually working Bookmarklet Generator: https://caiorss.github.io/bookmarklet-maker/
 
 
 
