@@ -13,19 +13,35 @@
 
 var DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
 
+const allVideos = new Map();
 
-function handleInterceptedRequest () {
-    let response = JSON.parse(this.responseText);
-    console.log({response})
-    const { videos } = response;
-	let waitTime = 0;
-	// Clear old buttons
+function renderListOfVideos() {
+	const el = document.createElement('div');
+	el.classList.add('ytcreatordownloader-list');
+	el.innerHTML = `
+		<ul>
+	`;
+	document.body.appendChild(el)
+}
+
+function removeButtons() {
 	const oldButtons = document.querySelectorAll('[data-temporary]');
 	if (oldButtons) {
 		Array.from(oldButtons).forEach(item => {
 			item.parentNode.removeChild(item);
 		});
 	}
+}
+
+function handleInterceptedRequest () {
+    let response = JSON.parse(this.responseText);
+    console.warn('Server listing response:', {response})
+    const { videos } = response;
+    videos.forEach((video) => allVideos.set(video.videoId, video));
+    console.log('videos added:', {allVideos})
+	let waitTime = 0;
+	// Clear old buttons
+	removeButtons();
 	// Create the buttons
 	let downloadButton = document.createElement('button');
 	downloadButton.setAttribute('data-temporary', true);
@@ -57,19 +73,15 @@ function handleInterceptedRequest () {
             	setTimeout(() => window.open(DONATION_URL, 'donate'), 1000);
             }
         });
-		document.body.removeChild(downloadButton);
-		document.body.removeChild(cancelButton);
-		delete downloadButton;
-		delete cancelButton;
+		removeButtons();
 		delete waitTime;
     };
 }
 
 
 let interceptor = function (method, url, async) {
-    console.log('Intercepted request: ', {url, method, async});
 	if (url.indexOf('/youtubei/v1/creator/list_creator_videos') !== -1) {
-		console.log('Listing page request found...');
+		console.log('Listing page request found...', { method, url, isAsync: async});
 		console.warn({this: this});
 		this.addEventListener('load', handleInterceptedRequest);
 
@@ -103,7 +115,7 @@ function injectInterceptor() {
 		
 }
 
-setTimeout(() => {
-	injectInterceptor();
-}, 6000);
-
+window.addEventListener('load', (event) => {
+    injectInterceptor();
+	window._allVideos = allVideos;
+});
