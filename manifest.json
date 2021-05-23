@@ -3,7 +3,11 @@
 	"description": "Backup all your own YouTube videos from the Creator Studio automagically.",
 	"version": "1.0",
 	"manifest_version": 3,
-	"permissions": ["storage", "activeTab", "scripting", "downloads"],
+	"permissions": ["storage", "activeTab", "scripting", "downloads", "downloads.open", "downloads.shelf"],
+	"optional_permissions": ["management"],
+	"background": {
+		"service_worker": "background.js"
+	},
 	"action": {
 		"default_popup": "popup.html"
 	},
@@ -27,6 +31,9 @@
 	  	 "run_at": "document_start"
 	   }
 	 ],
+    "externally_connectable": {
+    	"matches": ["https://*.youtube.com/*"]
+    },
 	"web_accessible_resources": [
 		{
 		  "resources": [ "script.js", "styles.css" ],

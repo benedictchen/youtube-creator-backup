@@ -51,5 +51,9 @@ If this was helpful to you, please buy me (@benedictchen) a beer on PayPal: [Cli
 Credit
 - An actually working Bookmarklet Generator: https://caiorss.github.io/bookmarklet-maker/
 
+Todos/Notes:
+- Chrome downloads API - https://github.com/GoogleChrome/chrome-extensions-samples/tree/main/mv2-archive/api/downloads
+
+
 
 

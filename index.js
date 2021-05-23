@@ -1,4 +1,6 @@
 
+(function() {
+
 function loadScript(url) {
 	let s = document.createElement('script');
 	s.src = chrome.runtime.getURL(url);
@@ -19,20 +21,25 @@ function loadCss(url) {
 loadScript('script.js');
 loadCss('styles.css');
 
-const port = chrome.runtime.connect();
+
+const allVideos = new Map();
 
 window.addEventListener("message", (event) => {
-	console.log('message received', {event});
+	console.log('message received from index.js', {event});
   // We only accept messages from ourselves
   if (event.source != window)
     return;
 
-  if (event.data.type && (event.data.type == "FROM_PAGE")) {
-    console.log("Content script received: " + event.data);
-    port.postMessage(event.data.text);
+  if (event.data.type && (event.data.type == "VIDEOS")) {
+  	console.log("Content script received: " + event.data);
+  	event.data.videos.forEach((video) => {
+  		allVideos.set(video.videoId, video);	
+  	});
+  	console.log('Updated videos inside index.js', allVideos);
+  	// console.log('what is index.js videos', window.localStorage.getItem('YoutubeVideos'));
+  	// console.log('downloads folder: ', chrome.downloads.show)
+  	// chrome.downloads.download({ url: Object.values(Object.fromEntries(allVideos))[0].downloadUrl })
   }
-}, false);
+}, true);
 
-
-
-
+})();

@@ -3,6 +3,10 @@
  * @author Benedict Chen (benedict@benedictchen.com) 
  */
 
+(function() {
+
+
+
 var DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
 
 const allVideos = new Map();
@@ -18,16 +22,14 @@ function removeElement(el) {
 	}
 }
 
-function renderListOfVideos() {
+function renderListOfVideos(allVideos) {
+	if (!allVideos) {
+		allVideos = new Map();
+	}
 	const existing = document.querySelectorAll('.ytcreatordownloader-list');
-	
-
 	Array.from(existing).forEach(item => removeElement(item));
-
-
 	const el = document.createElement('div');
 	el.classList.add('ytcreatordownloader-list');
-
 	const listItems = Array.from(allVideos.values()).map((video) => {
 		return `<li>${video.title}</li>`;
 	});
@@ -89,13 +91,12 @@ function removeButtons() {
 
 function handleInterceptedRequest () {
     let response = JSON.parse(this.responseText);
-    console.warn('Server listing response:', {response})
+    console.log('Server listing response:', {response})
     const { videos } = response;
     videos.forEach((video) => allVideos.set(video.videoId, video));
-    renderListOfVideos()
     console.log('videos added:', {allVideos, allHeaders});
-    window.postMessage({ type: "FROM_PAGE", videos }, "*");
-
+    window.postMessage({ type: "VIDEOS", videos }, "*");
+    window.localStorage.setItem('YoutubeVideos', JSON.stringify(Object.fromEntries(allVideos)));
 }
 
 
@@ -115,7 +116,7 @@ window._setHeaderInterceptor = function(key, value) {
 
 function injectInterceptor() {
 	if (window.location.hostname.toLowerCase().indexOf('youtube') === -1) {
-	  console.warn('Site is not youtube. Exiting...');
+	  console.log('Site is not youtube. Exiting...');
 	  return;
 	}
 
@@ -140,7 +141,7 @@ function injectInterceptor() {
 			new: window._interceptor, 
 			old: window.oldXHROpen});
 	} else {
-		console.warn('Already have interceptor');
+		console.log('Already have interceptor');
 	}
 		
 }
@@ -154,3 +155,9 @@ window.addEventListener('load', (event) => {
     injectInterceptor();
 	window._allVideos = allVideos;
 });
+
+window.addEventListener('message', (event) => {
+    console.log(`Received message: ${event.data}`, {event});
+});
+
+})();
