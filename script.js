@@ -1,11 +1,3 @@
-// let color = '#3aa757';
-
-// chrome.runtime.onInstalled.addListener(() => {
-//   chrome.storage.sync.set({ color });
-//   console.log('Default background color set to %cgreen', `color: ${color}`);
-// });
-
-
 /**
  * © Copyright 2021 Benedict Chen. All Rights Reserved.
  * @author Benedict Chen (benedict@benedictchen.com) 
@@ -14,51 +6,56 @@
 var DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
 
 const allVideos = new Map();
+let waitTime = 0;
 
-function renderListOfVideos() {
-	const el = document.createElement('div');
-	el.classList.add('ytcreatordownloader-list');
-	el.innerHTML = `
-		<ul>
-	`;
-	document.body.appendChild(el)
-}
-
-function removeButtons() {
-	const oldButtons = document.querySelectorAll('[data-temporary]');
-	if (oldButtons) {
-		Array.from(oldButtons).forEach(item => {
-			item.parentNode.removeChild(item);
-		});
+function removeElement(el) {
+	if (el !== document.body) {
+		el.parentNode.removeChild(el)	
 	}
 }
 
-function handleInterceptedRequest () {
-    let response = JSON.parse(this.responseText);
-    console.warn('Server listing response:', {response})
-    const { videos } = response;
-    videos.forEach((video) => allVideos.set(video.videoId, video));
-    console.log('videos added:', {allVideos})
-	let waitTime = 0;
-	// Clear old buttons
-	removeButtons();
-	// Create the buttons
+
+function renderListOfVideos() {
+	const existing = document.querySelectorAll('.ytcreatordownloader-list');
+	
+
+	Array.from(existing).forEach(item => removeElement(item));
+
+
+	const el = document.createElement('div');
+	el.classList.add('ytcreatordownloader-list');
+
+	const listItems = Array.from(allVideos.values()).map((video) => {
+		return `<li>${video.title}</li>`;
+	});
+	el.innerHTML = `
+		<div>
+			Total videos: ${Array.from(allVideos.keys()).length}
+		</div>
+		<ul>
+			${listItems.join('')}
+		</ul>
+	`;
+	document.body?.appendChild(el)
+}
+
+function createButtons(videos) {
 	let downloadButton = document.createElement('button');
 	downloadButton.setAttribute('data-temporary', true);
     downloadButton.textContent = "Download Videos";
     downloadButton.style = "position:absolute; right: 30px; bottom: 30px; font-size:50px; background-color:green; color: white; border-radius: 5px; padding: 30px;"
-    document.body.appendChild(downloadButton);
+    document.body?.appendChild(downloadButton);
 	let cancelButton = document.createElement('button');
 	cancelButton.setAttribute('data-temporary', true);
     cancelButton.textContent = "Cancel";
     cancelButton.style = "position:absolute; left: 30px; bottom: 30px; font-size:50px; background-color:red; color: white; border-radius: 5px; padding: 30px;"
 	cancelButton.onclick = () => {
-		document.body.removeChild(cancelButton);
-		document.body.removeChild(downloadButton);
+		document.body?.removeChild(cancelButton);
+		document.body?.removeChild(downloadButton);
 		delete downloadButton;
-		delete waitTime;
+		waitTime = 0;
 	};
-    document.body.appendChild(cancelButton);
+    document.body?.appendChild(cancelButton);
     downloadButton.onclick = () => { 
 		videos.forEach((item) => {
             console.log(item);
@@ -74,8 +71,32 @@ function handleInterceptedRequest () {
             }
         });
 		removeButtons();
-		delete waitTime;
+		waitTime = 0;
     };
+}
+
+function removeButtons() {
+	const oldButtons = document.querySelectorAll('[data-temporary]');
+	if (oldButtons) {
+		Array.from(oldButtons).forEach(item => {
+			console.warn({item: item, parent: item.parent})
+			removeElement(item);
+		});
+	}
+}
+
+function handleInterceptedRequest () {
+    let response = JSON.parse(this.responseText);
+    console.warn('Server listing response:', {response})
+    const { videos } = response;
+    videos.forEach((video) => allVideos.set(video.videoId, video));
+    renderListOfVideos()
+    console.log('videos added:', {allVideos})
+	
+	// Clear old buttons
+	removeButtons();
+	// Create the buttons
+	createButtons(videos);
 }
 
 
@@ -114,6 +135,11 @@ function injectInterceptor() {
 	}
 		
 }
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    injectInterceptor();
+	window._allVideos = allVideos;
+});
 
 window.addEventListener('load', (event) => {
     injectInterceptor();
