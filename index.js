@@ -19,6 +19,20 @@ function loadCss(url) {
 loadScript('script.js');
 loadCss('styles.css');
 
+const port = chrome.runtime.connect();
+
+window.addEventListener("message", (event) => {
+	console.log('message received', {event});
+  // We only accept messages from ourselves
+  if (event.source != window)
+    return;
+
+  if (event.data.type && (event.data.type == "FROM_PAGE")) {
+    console.log("Content script received: " + event.data);
+    port.postMessage(event.data.text);
+  }
+}, false);
+
 
 
 

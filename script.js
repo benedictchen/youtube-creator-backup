@@ -6,14 +6,17 @@
 var DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
 
 const allVideos = new Map();
+const allHeaders = new Map();
 let waitTime = 0;
+
+window._oldXHROpen = window.XMLHttpRequest.prototype.open;
+window._oldSetHeader = window.XMLHttpRequest.prototype.setRequestHeader;
 
 function removeElement(el) {
 	if (el !== document.body) {
 		el.parentNode.removeChild(el)	
 	}
 }
-
 
 function renderListOfVideos() {
 	const existing = document.querySelectorAll('.ytcreatordownloader-list');
@@ -79,7 +82,6 @@ function removeButtons() {
 	const oldButtons = document.querySelectorAll('[data-temporary]');
 	if (oldButtons) {
 		Array.from(oldButtons).forEach(item => {
-			console.warn({item: item, parent: item.parent})
 			removeElement(item);
 		});
 	}
@@ -91,28 +93,27 @@ function handleInterceptedRequest () {
     const { videos } = response;
     videos.forEach((video) => allVideos.set(video.videoId, video));
     renderListOfVideos()
-    console.log('videos added:', {allVideos})
-	
-	// Clear old buttons
-	removeButtons();
-	// Create the buttons
-	createButtons(videos);
+    console.log('videos added:', {allVideos, allHeaders});
+    window.postMessage({ type: "FROM_PAGE", videos }, "*");
+
 }
 
 
-let interceptor = function (method, url, async) {
+window._interceptor = function (method, url, async) {
 	if (url.indexOf('/youtubei/v1/creator/list_creator_videos') !== -1) {
 		console.log('Listing page request found...', { method, url, isAsync: async});
-		console.warn({this: this});
+		console.log({this: this});
 		this.addEventListener('load', handleInterceptedRequest);
-
 	}
     return oldXHROpen.apply(this, arguments);
 }
 
+window._setHeaderInterceptor = function(key, value) {
+	allHeaders.set(key, value);
+	return window._oldSetHeader.apply(this, arguments);	
+}
 
 function injectInterceptor() {
-	window.oldXHROpen = window.XMLHttpRequest.prototype.open;
 	if (window.location.hostname.toLowerCase().indexOf('youtube') === -1) {
 	  console.warn('Site is not youtube. Exiting...');
 	  return;
@@ -124,11 +125,19 @@ function injectInterceptor() {
 		return;
 	}
 
-	if (window.XMLHttpRequest.prototype.open !== interceptor && !window.XMLHttpRequest.prototype.open.isIntercepted) {
-		window.XMLHttpRequest.prototype.open = interceptor;
-		interceptor.isIntercepted = true;
+	if (XMLHttpRequest.prototype.setRequestHeader !== window._setHeaderInterceptor) {
+		console.log('Intercepting setHeader');
+		window._oldSetHeader = window.XMLHttpRequest.prototype.setRequestHeader;
+		 window.XMLHttpRequest.prototype.setRequestHeader = window._setHeaderInterceptor;
+	}
+
+
+	if (window.XMLHttpRequest.prototype.open !== window._interceptor && window.XMLHttpRequest.prototype.open.isIntercepted !== true) {
+		window.oldXHROpen = window.XMLHttpRequest.prototype.open;
+		window.oldSetHeader = window.XMLHttpRequest.prototype.setHeader;
+		window.XMLHttpRequest.prototype.open = window._interceptor;
 		console.log('Interceptor injected.', {
-			new: interceptor, 
+			new: window._interceptor, 
 			old: window.oldXHROpen});
 	} else {
 		console.warn('Already have interceptor');

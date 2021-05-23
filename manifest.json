@@ -21,14 +21,16 @@
 	     "js": [
 	     	"index.js",
 	     	"script.js"
-	     ]
+	     ],
+	     "all_frames": true,
+	  	 "match_about_blank": true,
+	  	 "run_at": "document_start"
 	   }
 	 ],
 	"web_accessible_resources": [
 		{
 		  "resources": [ "script.js", "styles.css" ],
-		  "matches": [ "https://studio.youtube.com/*" ],
-		  "all_frames": true
+		  "matches": [ "https://studio.youtube.com/*" ]
 		}
 	]
 }
