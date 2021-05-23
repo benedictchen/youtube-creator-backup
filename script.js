@@ -7,11 +7,22 @@
 
 
 
-var DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
+const DONATION_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS';
+const LOCALSTORAGE_KEY = 'YoutubeVideos';
+
+
+const existingVideos = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
 
 const allVideos = new Map();
 const allHeaders = new Map();
 let waitTime = 0;
+
+if (existingVideos) {
+	Object.keys(existingVideos).forEach((key) => {
+		const value = existingVideos[key];
+		allVideos.set(key, value);
+	});
+}
 
 window._oldXHROpen = window.XMLHttpRequest.prototype.open;
 window._oldSetHeader = window.XMLHttpRequest.prototype.setRequestHeader;
@@ -96,7 +107,7 @@ function handleInterceptedRequest () {
     videos.forEach((video) => allVideos.set(video.videoId, video));
     console.log('videos added:', {allVideos, allHeaders});
     window.postMessage({ type: "VIDEOS", videos }, "*");
-    window.localStorage.setItem('YoutubeVideos', JSON.stringify(Object.fromEntries(allVideos)));
+    window.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(Object.fromEntries(allVideos)));
 }
 
 
